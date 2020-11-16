@@ -1,5 +1,6 @@
 from __future__ import print_function
 import torch
+import torch.nn as nn
 import os
 import ipyplot
 import webbrowser
@@ -14,7 +15,7 @@ from PIL import Image
 from model.linear1 import linear1
 from model.loss import mnist_loss
 from model.params import init_params
-from model.train import calc_grad, batch_accuracy, validate_epoch, train_epoch
+from model.train import calc_grad, batch_accuracy, validate_epoch, train_epoch, train_model
 from utils.data import download_file, URLs, extract_file, get_mnist_dataset
 from utils.image import imshow, visualize_dataset
 
@@ -40,9 +41,6 @@ if __name__ == '__main__':
 
     dataiter = iter(trainloader)
 
-    weights = init_params((28*28, 1))
-    bias = init_params(1)
-
     # xb, yb = dataiter.next()
     # print(xb.shape, yb.shape)
     #
@@ -67,11 +65,9 @@ if __name__ == '__main__':
     # print(batch_accuracy(batch, yb[:4]))
     # print('before 1 epoch: ', validate_epoch(linear1, weights, bias, testloader))
 
-    lr = 1.
-    params = weights, bias
     # train_epoch(linear1, trainloader, lr, params)
     # print('after 1 epoch: ', validate_epoch(linear1, weights, bias, testloader))
 
-    for i in range(20):
-        train_epoch(linear1, trainloader, lr, params)
-        print(f'Epoch {i}: {validate_epoch(linear1, weights, bias, testloader)}')
+    lr = 1
+    linear_model = nn.Linear(28*28, 1)
+    train_model(linear_model, trainloader, testloader, lr, 20)
