@@ -1,23 +1,11 @@
 from __future__ import print_function
+
 import torch
 import torch.nn as nn
-import os
-import ipyplot
-import webbrowser
-import numpy as np
-import matplotlib.pyplot as plt
-import torchvision
-import torchvision.transforms as transforms
-from torchvision.utils import make_grid
 from torch.utils.data import TensorDataset, DataLoader
-from PIL import Image
 
-from model.linear1 import linear1
-from model.loss import mnist_loss
-from model.params import init_params
-from model.train import calc_grad, batch_accuracy, validate_epoch, train_epoch, train_model
-from utils.data import download_file, URLs, extract_file, get_mnist_dataset
-from utils.image import imshow, visualize_dataset
+from model.train import train_model
+from utils.data import get_mnist_dataset
 
 if __name__ == '__main__':
     data = get_mnist_dataset(print_progress=False)

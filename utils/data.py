@@ -1,12 +1,11 @@
-import requests
-import os
-import re
-import validators
 import gzip
+import os
 import shutil
-import idx2numpy
-import numpy as np
 from pathlib import Path
+
+import idx2numpy
+import requests
+import validators
 
 
 class URLs:
