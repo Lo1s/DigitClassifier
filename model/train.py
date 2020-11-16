@@ -1,7 +1,7 @@
+import torch
+
 from model.BasicOptim import BasicOptim
 from model.loss import mnist_loss
-import torch
-import torch.nn as nn
 
 
 def calc_grad(x, y, model):
