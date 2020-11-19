@@ -7,7 +7,8 @@ import torch.optim as optim
 import torchvision
 from torch.utils.data import TensorDataset
 
-from model.train import train, test
+from model.test import test
+from model.train import train
 from net.Net import Net
 from utils.data import URLs
 from utils.plot import plot_perf
