@@ -22,23 +22,27 @@ if __name__ == '__main__':
 
     # visualize_dataset(train_images, train_labels, 10000)
 
-    train_loader = torch.utils.data.DataLoader(
-        torchvision.datasets.MNIST(URLs.DATA_PATH, train=True, download=True,
-                                   transform=torchvision.transforms.Compose([
+    transform = torchvision.transforms.Compose([
                                        torchvision.transforms.ToTensor(),
                                        torchvision.transforms.Normalize(
                                            (0.1307,), (0.3081,))
-                                   ])),
-        batch_size=64, shuffle=True)
+                                   ])
+
+    train_loader = torch.utils.data.DataLoader(
+        torchvision.datasets.MNIST(
+            URLs.DATA_PATH,
+            train=True,
+            download=True,
+            transform=transform
+        ), batch_size=64, shuffle=True)
 
     test_loader = torch.utils.data.DataLoader(
-        torchvision.datasets.MNIST(URLs.DATA_PATH, train=False, download=True,
-                                   transform=torchvision.transforms.Compose([
-                                       torchvision.transforms.ToTensor(),
-                                       torchvision.transforms.Normalize(
-                                           (0.1307,), (0.3081,))
-                                   ])),
-        batch_size=1000, shuffle=True)
+        torchvision.datasets.MNIST(
+            URLs.DATA_PATH,
+            train=False,
+            download=True,
+            transform=transform
+        ), batch_size=1000, shuffle=True)
 
     lr = 0.01
     epochs = 3
