@@ -17,6 +17,8 @@ class URLs:
     MNIST_TEST_IMAGES = 'http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz'
     MNIST_TEST_LABELS = 'http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz'
     MNIST_DATASET = [MNIST_TRAIN_IMAGES, MNIST_TRAIN_LABELS, MNIST_TEST_IMAGES, MNIST_TEST_LABELS]
+    RESULTS_DIR = 'results'
+    RESULTS_PATH = PROJECT_PATH / RESULTS_DIR
 
 
 data = {

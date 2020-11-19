@@ -1,61 +1,66 @@
 from __future__ import print_function
 
-import torch
-import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
+import time
 
-from model.train import train_model
-from utils.data import get_mnist_dataset
+import torch
+import torch.optim as optim
+import torchvision
+from torch.utils.data import TensorDataset
+
+from model.train import train, test
+from net.Net import Net
+from utils.data import URLs
+from utils.plot import plot_perf
 
 if __name__ == '__main__':
-    data = get_mnist_dataset(print_progress=False)
-    train_images = data['train']['images']
-    train_labels = data['train']['labels']
-    test_images = data['test']['images']
-    test_labels = data['test']['labels']
+    # data = get_mnist_dataset(print_progress=False)
+    # train_images = data['train']['images']
+    # train_labels = data['train']['labels']
+    # test_images = data['test']['images']
+    # test_labels = data['test']['labels']
 
     # visualize_dataset(train_images, train_labels, 10000)
 
-    torch_train_images = torch.Tensor(train_images).view(-1, 28*28)
-    torch_train_labels = torch.Tensor(train_labels).unsqueeze(1)
-    torch_test_images = torch.Tensor(test_images).view(-1, 28*28)
-    torch_test_labels = torch.Tensor(test_labels).unsqueeze(1)
+    train_loader = torch.utils.data.DataLoader(
+        torchvision.datasets.MNIST(URLs.DATA_PATH, train=True, download=True,
+                                   transform=torchvision.transforms.Compose([
+                                       torchvision.transforms.ToTensor(),
+                                       torchvision.transforms.Normalize(
+                                           (0.1307,), (0.3081,))
+                                   ])),
+        batch_size=64, shuffle=True)
 
-    trainset = TensorDataset(torch_train_images, torch_train_labels)
-    trainloader = DataLoader(trainset, batch_size=256)
+    test_loader = torch.utils.data.DataLoader(
+        torchvision.datasets.MNIST(URLs.DATA_PATH, train=False, download=True,
+                                   transform=torchvision.transforms.Compose([
+                                       torchvision.transforms.ToTensor(),
+                                       torchvision.transforms.Normalize(
+                                           (0.1307,), (0.3081,))
+                                   ])),
+        batch_size=1000, shuffle=True)
 
-    testset = TensorDataset(torch_test_images, torch_test_labels)
-    testloader = DataLoader(testset, batch_size=256)
+    lr = 0.01
+    epochs = 3
+    model = Net()
+    # model_state_dict = torch.load(str(URLs.RESULTS_PATH / 'model.pth'))
+    # model.load_state_dict(model_state_dict)
+    opt = optim.SGD(model.parameters(), lr, momentum=0.5)
+    # opt_state_dict = torch.load(str(URLs.RESULTS_PATH / 'optimizer.pth'))
+    # opt.load_state_dict(opt_state_dict)
+    train_losses = []
+    train_counter = []
+    test_losses = []
+    test_counter = [i * len(train_loader.dataset) for i in range(epochs + 1)]
+    device = torch.device("cpu")
 
-    dataiter = iter(trainloader)
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+        model.cuda()
 
-    # xb, yb = dataiter.next()
-    # print(xb.shape, yb.shape)
-    #
-    # batch = xb[:4]
-    # print(batch.shape)
-    #
-    # preds = linear1(batch, weights, bias)
-    # print(preds)
-    #
-    # loss = mnist_loss(preds, yb[:4])
-    # print(loss)
-    #
-    # loss.backward()
-    # print(weights.grad.shape, weights.grad.mean(), bias.grad)
-    #
-    # calc_grad(batch, yb[:4], weights, bias, linear1)
-    # print(weights.grad.mean(), bias.grad)
-    #
-    # weights.grad.zero_()
-    # bias.grad.zero_()
-    #
-    # print(batch_accuracy(batch, yb[:4]))
-    # print('before 1 epoch: ', validate_epoch(linear1, weights, bias, testloader))
-
-    # train_epoch(linear1, trainloader, lr, params)
-    # print('after 1 epoch: ', validate_epoch(linear1, weights, bias, testloader))
-
-    lr = 1
-    linear_model = nn.Linear(28*28, 1)
-    train_model(linear_model, trainloader, testloader, lr, 20)
+    start_time = time.time()
+    test(model, test_loader, device, test_losses)
+    for epoch in range(1, epochs + 1):
+        train(epoch, model, opt, train_loader, device, train_losses, train_counter, 10)
+        test(model, test_loader, device, test_losses)
+    print(f'Running time: {time.strftime("%M:%S", time.gmtime(time.time() - start_time))} sec')
+    plot_perf(train_counter, train_losses, test_counter, test_losses)
