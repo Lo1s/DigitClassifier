@@ -32,10 +32,11 @@ def train_model(model, dataloader, testloader, lr, epochs):
         print(f'Epoch {i}: {validate_epoch(model, testloader)}')
 
 
-def train(epoch, model, opt, train_loader, device, train_losses, train_counter, log_interval):
+def train(epoch, model, opt, train_loader, device, train_losses, train_counter, log_interval, writer):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
+        writer.add_graph(model, data)
         opt.zero_grad()
         output = model(data)
         loss = F.nll_loss(output, target)
@@ -43,7 +44,9 @@ def train(epoch, model, opt, train_loader, device, train_losses, train_counter, 
         opt.step()
         if batch_idx % log_interval == 0:
             print(f'Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)}] Loss: {loss.item()}')
-            train_losses.append(loss.item())
+            loss_item = loss.item()
+            writer.add_scalar('training loss', loss_item / log_interval, epoch * len(train_loader) + batch_idx)
+            train_losses.append(loss_item)
             train_counter.append(batch_idx * 64 + ((epoch - 1) * len(train_loader.dataset)))
 
             if not os.path.exists(URLs.RESULTS_PATH):
